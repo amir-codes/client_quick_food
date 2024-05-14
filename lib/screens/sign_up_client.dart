@@ -46,11 +46,12 @@ class SignUpClient extends StatelessWidget {
             .doc(_firebase.currentUser?.uid)
             .set({
           'userId': _firebase.currentUser?.uid,
+          'password': _enteredPassword,
           'username': _enteredUsername,
           'email': _enteredEmail,
           'phone number': _enteredNumber,
           'imageUrl': '',
-          'password': _enteredPassword,
+          
         });
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => const MyHomePage(index: 0),

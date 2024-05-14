@@ -1,6 +1,7 @@
 import 'package:client_quick_food/components/my_text_button.dart';
 import 'package:client_quick_food/components/sec_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChangePassword extends StatefulWidget {
@@ -48,7 +49,8 @@ class _ChangePasswordState extends State<ChangePassword> {
       if (!valid) {
         return;
       }
-
+      await FirebaseAuth.instance.currentUser!
+          .updatePassword(newpsswd.text.trim());
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:client_quick_food/components/my_text_button.dart';
 import 'package:client_quick_food/components/sec_text_field.dart';
+import 'package:client_quick_food/screens/profile_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -64,7 +65,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'phone number': phone.text.trim()
       });
       myFormState.currentState!.save();
-      Navigator.of(context).pop();
     }
 
     Future _pickImageFromGallery() async {
@@ -117,6 +117,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
           'Edit Profile',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (context) => Profil(index: 4, userId: widget.userId),
+              ));
+            },
+            icon: const Icon(Icons.arrow_back)),
       ),
       body: SingleChildScrollView(
         child: Padding(

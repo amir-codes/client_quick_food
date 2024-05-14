@@ -55,7 +55,7 @@ class _ProfilState extends State<Profil> {
       text: 'Edit Profile',
       icon: const Icon(Icons.mode_edit),
       myFunction: () {
-        Navigator.of(context).push(MaterialPageRoute(
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => EditProfilePage(
             profilePicture: profilePicture,
             userId: widget.userId,

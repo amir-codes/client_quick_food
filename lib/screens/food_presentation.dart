@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,50 +12,76 @@ class FoodInterface extends StatefulWidget {
   final String rate;
   final String price;
   bool isFavorite;
-  
-  FoodInterface({super.key, required this.imageUrl, required this.name, required this.description, required this.deliveryTime, required this.rate, required this.price, required this.isFavorite, required this.foodId, required this.restaurantId});
+
+  FoodInterface(
+      {super.key,
+      required this.imageUrl,
+      required this.name,
+      required this.description,
+      required this.deliveryTime,
+      required this.rate,
+      required this.price,
+      required this.isFavorite,
+      required this.foodId,
+      required this.restaurantId});
 
   @override
   State<FoodInterface> createState() => _FoodInterfaceState();
 }
 
 class _FoodInterfaceState extends State<FoodInterface> {
+  int _purchaseCount = 0;
   final TextEditingController _controller = TextEditingController();
-  
+
+  void _incrementCount() {
+    setState(() {
+      _purchaseCount++;
+    });
+  }
+
+  void _decrementCount() {
+    setState(() {
+      if (_purchaseCount > 0) {
+        _purchaseCount--;
+      }
+    });
+  }
+
+  int somme(int price, int count) {
+    return price * count;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final currentUser=FirebaseAuth.instance.currentUser!.uid;
-   
-    void _addFav()async{
-        await FirebaseFirestore.instance
-        .collection('Favourite foods')
-        .add(
-          {
-            'foodId' : widget.foodId,
-            'userId' :  FirebaseAuth.instance.currentUser!.uid,
-          }
-        );
-         
+    final currentUser = FirebaseAuth.instance.currentUser!.uid;
+
+    void _addFav() async {
+      await FirebaseFirestore.instance.collection('Favourite foods').add({
+        'foodId': widget.foodId,
+        'userId': FirebaseAuth.instance.currentUser!.uid,
+      });
     }
-    void _suppFav()async{
+
+    void _suppFav() async {
       await FirebaseFirestore.instance
-      .collection('Favourites foods')
-      .doc(widget.name).delete();
+          .collection('Favourites foods')
+          .doc(widget.name)
+          .delete();
     }
-    void _saveOrder()async{
-      await FirebaseFirestore.instance.collection('Orders')
-      .doc(widget.name)
-      .set({
-          'name' : widget.name,
-          'imageUrl' : widget.imageUrl,
-          'userId' : currentUser,
-          'restaurantId' : widget.restaurantId,
-          'price' : widget.price,
+
+    void _saveOrder() async {
+      await FirebaseFirestore.instance.collection('Orders').add({
+        'orderId': FirebaseAuth.instance.currentUser!.uid + widget.foodId,
+        'restaurantID': widget.restaurantId,
+        'clientID': FirebaseAuth.instance.currentUser!.uid,
+        'foodID': widget.foodId,
+        'Qte': _purchaseCount,
+        'Status': 0,
+        'Date': Timestamp.now()
       });
     }
 
     int priceInt = int.parse(widget.price);
-    int purchasesNumber = 1;
 
     return Scaffold(
       body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -99,17 +124,16 @@ class _FoodInterfaceState extends State<FoodInterface> {
                         icon: widget.isFavorite
                             ? const Icon(Icons.favorite_sharp)
                             : const Icon(Icons.favorite_border_outlined),
-                        color: widget.isFavorite
-                            ? Colors.redAccent
-                            : Colors.white,
+                        color:
+                            widget.isFavorite ? Colors.redAccent : Colors.white,
                         iconSize: 30,
                         onPressed: () {
-                          if (!widget.isFavorite){
+                          if (!widget.isFavorite) {
                             _addFav();
                           }
-                          if(widget.isFavorite){
+                          if (widget.isFavorite) {
                             _suppFav();
-                          } 
+                          }
                           setState(() {
                             //amir if widget.foodInformation.['isFavorite'] == true then  remove from fvorite list else add it
                             widget.isFavorite = !widget.isFavorite;
@@ -158,8 +182,7 @@ class _FoodInterfaceState extends State<FoodInterface> {
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Text(
-                                "$priceInt DA",
+                            Text("$priceInt DA",
                                 style: const TextStyle(color: Colors.white)),
                             Row(
                               children: [
@@ -209,8 +232,7 @@ class _FoodInterfaceState extends State<FoodInterface> {
                       )
                     ],
                   ),
-                  onTap: () {
-                  },
+                  onTap: () {},
                 ),
                 const SizedBox(height: 20),
                 Padding(
@@ -226,58 +248,33 @@ class _FoodInterfaceState extends State<FoodInterface> {
           ),
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ////////////////////////////////////////////////////////
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
             ElevatedButton(
               style: ButtonStyle(
                   backgroundColor:
                       MaterialStateProperty.all<Color>(Colors.redAccent)),
+              onPressed: _decrementCount,
               child: const Text(
                 "-",
                 style: TextStyle(color: Colors.white, fontSize: 30),
               ),
-              onPressed: () {
-                setState(() {
-                  purchasesNumber--;
-                  print('hadddaaaaaaa purchse - est $purchasesNumber');
-                  _controller.text = purchasesNumber.toString();
-                });
-              },
             ),
-            ////////////////////////////////////////////
-            SizedBox(
-              width: 20,
-              child: TextField(
-                controller: _controller,
-                onChanged: (value) {
-                  int p = int.parse(value);
-                  setState(() {
-                    //purchasesNumber = p;
-                  });
-                },
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: purchasesNumber.toString(),
-                  border: InputBorder.none,
-                ),
-              ),
+            const SizedBox(width: 20),
+            Text(
+              '$_purchaseCount',
+              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(width: 20),
             ElevatedButton(
               style: ButtonStyle(
                   backgroundColor:
                       MaterialStateProperty.all<Color>(Colors.redAccent)),
+              onPressed: _incrementCount,
               child: const Text(
                 "+",
                 style: TextStyle(color: Colors.white, fontSize: 30),
               ),
-              onPressed: () {
-                setState(() {
-                  purchasesNumber= purchasesNumber +1;
-                  print('hadddaaaaaaa purchse + est $purchasesNumber');
-                  _controller.text = purchasesNumber.toString();
-                });
-              },
             ),
           ],
         ),
@@ -294,7 +291,7 @@ class _FoodInterfaceState extends State<FoodInterface> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 child: Text(
-                  "${priceInt * purchasesNumber} DA",
+                  "${somme(priceInt, _purchaseCount)} DA",
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
@@ -315,7 +312,7 @@ class _FoodInterfaceState extends State<FoodInterface> {
                     MaterialStateProperty.all<Color>(Colors.redAccent),
               ),
               onPressed: () {
-                    _saveOrder();
+                _saveOrder();
               },
               child: const Text(
                 "Order Now",
